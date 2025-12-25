@@ -1,29 +1,22 @@
 import random
 import time
 import tkinter as tk
+from optparse import OptionParser
 
-# Main Screen
-root = tk.Tk()
-root.title("Ant Simulation")
+MAX_NUM_ANTS = 100000
+FULL_SCREEN_SIZE = (1280, 720)
+NORMAL_SCREEN_SIZE = (320, 320)
 
-last_time = time.perf_counter()
-
-canvas = tk.Canvas(root, width=1280, height=720, bg="white")
-canvas.pack()
-
-# Make Ants
-ants = []
-for _ in range(100000):
-        x_coord = random.random() * 1280
-        y_coord = random.random() * 720
-        ants.append([x_coord, y_coord])
 
 def update(ants):
     for ant in ants:
-        ant[0] += random.random() * 10 - 5
-        ant[1] += random.random() * 10 - 5
+        ant[0] += random.randint(-5, 5)
+        ant[1] += random.randint(-5, 5)
+
 
 def draw(canvas, ants):
+    canvas.delete("all")
+
     # Homes
     canvas.create_rectangle(
         10,
@@ -31,8 +24,8 @@ def draw(canvas, ants):
         50,
         50,
         fill="blue",  # Fill color
-        outline="black", # Outline color
-        width=2     # Outline width
+        outline="black",  # Outline color
+        width=2,  # Outline width
     )
 
     canvas.create_rectangle(
@@ -41,8 +34,8 @@ def draw(canvas, ants):
         1000,
         650,
         fill="blue",  # Fill color
-        outline="black", # Outline color
-        width=2     # Outline width
+        outline="black",  # Outline color
+        width=2,  # Outline width
     )
 
     canvas.create_rectangle(
@@ -51,8 +44,8 @@ def draw(canvas, ants):
         650,
         550,
         fill="blue",  # Fill color
-        outline="black", # Outline color
-        width=2     # Outline width
+        outline="black",  # Outline color
+        width=2,  # Outline width
     )
 
     # Gathering Spots
@@ -62,8 +55,8 @@ def draw(canvas, ants):
         50,
         650,
         fill="green",  # Fill color
-        outline="black", # Outline color
-        width=2     # Outline width
+        outline="black",  # Outline color
+        width=2,  # Outline width
     )
 
     canvas.create_rectangle(
@@ -72,8 +65,8 @@ def draw(canvas, ants):
         1050,
         60,
         fill="green",  # Fill color
-        outline="black", # Outline color
-        width=2     # Outline width
+        outline="black",  # Outline color
+        width=2,  # Outline width
     )
 
     canvas.create_rectangle(
@@ -82,8 +75,8 @@ def draw(canvas, ants):
         650,
         550,
         fill="green",  # Fill color
-        outline="black", # Outline color
-        width=2     # Outline width
+        outline="black",  # Outline color
+        width=2,  # Outline width
     )
 
     canvas.create_rectangle(
@@ -92,8 +85,8 @@ def draw(canvas, ants):
         350,
         400,
         fill="green",  # Fill color
-        outline="black", # Outline color
-        width=2     # Outline width
+        outline="black",  # Outline color
+        width=2,  # Outline width
     )
 
     canvas.create_rectangle(
@@ -102,20 +95,17 @@ def draw(canvas, ants):
         500,
         150,
         fill="green",  # Fill color
-        outline="black", # Outline color
-        width=2     # Outline width
+        outline="black",  # Outline color
+        width=2,  # Outline width
     )
 
     for ant in ants:
         canvas.create_rectangle(
-            ant[0],
-            ant[1],
-            ant[0],
-            ant[1],
-            fill="black", outline="black", width=1
+            ant[0], ant[1], ant[0], ant[1], fill="black", outline="black", width=1
         )
 
-def simulate(root, canvas, ants, last_time):
+
+def simulate(root, canvas, ants, last_time, debug):
     current_time = time.perf_counter()
     delta_time = current_time - last_time
     last_time = current_time
@@ -125,11 +115,75 @@ def simulate(root, canvas, ants, last_time):
     else:
         fps = 0
 
-    print("fps:", fps)
-    canvas.delete("all")
+    if debug:
+        print("fps:", fps)
     update(ants)
     draw(canvas, ants)
-    root.after(30, simulate, root, canvas, ants, last_time)
+    root.after(30, simulate, root, canvas, ants, last_time, debug)
 
-simulate(root, canvas, ants, last_time)
-root.mainloop()
+
+if __name__ == "__main__":
+    parser = OptionParser()
+    parser.add_option(
+        "-n",
+        "--num-ants",
+        dest="num_ants",
+        type="int",
+        default=100000,
+        help="number of ants to simulate, max 100000",
+    )
+    parser.add_option(
+        "-f",
+        "--full-screen",
+        action="store_true",
+        dest="full_screen",
+        default=False,
+        help="print the full screen to see all ants. Warning: Will lag out",
+    )
+    parser.add_option(
+        "-d",
+        "--debug",
+        action="store_true",
+        dest="debug",
+        default=False,
+        help="print debug output, e.g. fps",
+    )
+
+    (options, args) = parser.parse_args()
+    num_ants = min(MAX_NUM_ANTS, options.num_ants)
+    full_screen = options.full_screen
+    debug = options.debug
+
+    # Main Screen
+    root = tk.Tk()
+    root.title("Ant Simulation")
+
+    canvas = (
+        tk.Canvas(
+            root, width=FULL_SCREEN_SIZE[0], height=FULL_SCREEN_SIZE[1], bg="white"
+        )
+        if full_screen
+        else tk.Canvas(
+            root, width=NORMAL_SCREEN_SIZE[0], height=NORMAL_SCREEN_SIZE[1], bg="white"
+        )
+    )
+    canvas.pack()
+
+    # Make Ants
+    ants = []
+    for _ in range(num_ants):
+        x_coord = (
+            (random.randint(0, FULL_SCREEN_SIZE[0]))
+            if full_screen
+            else (random.randint(0, NORMAL_SCREEN_SIZE[0]))
+        )
+        y_coord = (
+            (random.randint(0, FULL_SCREEN_SIZE[1]))
+            if full_screen
+            else (random.randint(0, NORMAL_SCREEN_SIZE[1]))
+        )
+        ants.append([x_coord, y_coord])
+
+    last_time = time.perf_counter()
+    simulate(root, canvas, ants, last_time, debug)
+    root.mainloop()
