@@ -172,16 +172,8 @@ if __name__ == "__main__":
     # Make Ants
     ants = []
     for _ in range(num_ants):
-        x_coord = (
-            (random.randint(0, FULL_SCREEN_SIZE[0]))
-            if full_screen
-            else (random.randint(0, NORMAL_SCREEN_SIZE[0]))
-        )
-        y_coord = (
-            (random.randint(0, FULL_SCREEN_SIZE[1]))
-            if full_screen
-            else (random.randint(0, NORMAL_SCREEN_SIZE[1]))
-        )
+        x_coord = random.randint(0, FULL_SCREEN_SIZE[0])
+        y_coord = random.randint(0, FULL_SCREEN_SIZE[1])
         ants.append([x_coord, y_coord])
 
     last_time = time.perf_counter()
