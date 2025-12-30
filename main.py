@@ -8,10 +8,21 @@ FULL_SCREEN_SIZE = (1280, 720)
 NORMAL_SCREEN_SIZE = (320, 320)
 
 
+class Coord(object):
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+
+class Ant(object):
+    def __init__(self, coord):
+        self.location = coord
+
+
 def update(ants):
     for ant in ants:
-        ant[0] += random.randint(-5, 5)
-        ant[1] += random.randint(-5, 5)
+        ant.location.x += random.randint(-5, 5)
+        ant.location.y += random.randint(-5, 5)
 
 
 def draw(canvas, ants):
@@ -101,7 +112,13 @@ def draw(canvas, ants):
 
     for ant in ants:
         canvas.create_rectangle(
-            ant[0], ant[1], ant[0], ant[1], fill="black", outline="black", width=1
+            ant.location.x,
+            ant.location.y,
+            ant.location.x,
+            ant.location.y,
+            fill="black",
+            outline="black",
+            width=1,
         )
 
 
@@ -174,7 +191,7 @@ if __name__ == "__main__":
     for _ in range(num_ants):
         x_coord = random.randint(0, FULL_SCREEN_SIZE[0])
         y_coord = random.randint(0, FULL_SCREEN_SIZE[1])
-        ants.append([x_coord, y_coord])
+        ants.append(Ant(Coord(x_coord, y_coord)))
 
     last_time = time.perf_counter()
     simulate(root, canvas, ants, last_time, debug)
