@@ -19,6 +19,13 @@ class Ant(object):
         self.location = coord
 
 
+class Location(object):
+    def __init__(self, x, y, width, height, function):
+        self.coord1 = Coord(x, y)
+        self.coord2 = Coord(x + width, y + height)
+        self.function = function
+
+
 def update(ants):
     for ant in ants:
         ant.location.x += random.randint(-5, 5)
@@ -28,87 +35,19 @@ def update(ants):
 def draw(canvas, ants):
     canvas.delete("all")
 
-    # Homes
-    canvas.create_rectangle(
-        10,
-        10,
-        50,
-        50,
-        fill="blue",  # Fill color
-        outline="black",  # Outline color
-        width=2,  # Outline width
-    )
+    homes = [
+        Location(10, 10, 50, 50, "home"),
+        Location(950, 600, 50, 50, "home"),
+        Location(600, 550, 50, 50, "home"),
+    ]
 
-    canvas.create_rectangle(
-        950,
-        600,
-        1000,
-        650,
-        fill="blue",  # Fill color
-        outline="black",  # Outline color
-        width=2,  # Outline width
-    )
-
-    canvas.create_rectangle(
-        600,
-        600,
-        650,
-        550,
-        fill="blue",  # Fill color
-        outline="black",  # Outline color
-        width=2,  # Outline width
-    )
-
-    # Gathering Spots
-    canvas.create_rectangle(
-        10,
-        600,
-        50,
-        650,
-        fill="green",  # Fill color
-        outline="black",  # Outline color
-        width=2,  # Outline width
-    )
-
-    canvas.create_rectangle(
-        1000,
-        10,
-        1050,
-        60,
-        fill="green",  # Fill color
-        outline="black",  # Outline color
-        width=2,  # Outline width
-    )
-
-    canvas.create_rectangle(
-        600,
-        600,
-        650,
-        550,
-        fill="green",  # Fill color
-        outline="black",  # Outline color
-        width=2,  # Outline width
-    )
-
-    canvas.create_rectangle(
-        300,
-        350,
-        350,
-        400,
-        fill="green",  # Fill color
-        outline="black",  # Outline color
-        width=2,  # Outline width
-    )
-
-    canvas.create_rectangle(
-        450,
-        100,
-        500,
-        150,
-        fill="green",  # Fill color
-        outline="black",  # Outline color
-        width=2,  # Outline width
-    )
+    gathering_spots = [
+        Location(10, 600, 50, 50, "gathering"),
+        Location(1000, 10, 50, 50, "gathering"),
+        Location(600, 550, 50, 50, "gathering"),
+        Location(300, 350, 50, 50, "gathering"),
+        Location(450, 100, 50, 50, "gathering"),
+    ]
 
     for ant in ants:
         canvas.create_rectangle(
@@ -119,6 +58,28 @@ def draw(canvas, ants):
             fill="black",
             outline="black",
             width=1,
+        )
+
+    for home in homes:
+        canvas.create_rectangle(
+            home.coord1.x,
+            home.coord1.y,
+            home.coord2.x,
+            home.coord2.y,
+            fill="blue",
+            outline="black",
+            width=2,
+        )
+
+    for gathering in gathering_spots:
+        canvas.create_rectangle(
+            gathering.coord1.x,
+            gathering.coord1.y,
+            gathering.coord2.x,
+            gathering.coord2.y,
+            fill="green",
+            outline="black",
+            width=2,
         )
 
 
