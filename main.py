@@ -7,6 +7,8 @@ MAX_NUM_ANTS = 100000
 FULL_SCREEN_SIZE = (1280, 720)
 NORMAL_SCREEN_SIZE = (320, 320)
 
+STATES = ["Gathering", "Home"]
+
 
 class Coord(object):
     def __init__(self, x, y):
@@ -15,8 +17,9 @@ class Coord(object):
 
 
 class Ant(object):
-    def __init__(self, coord):
+    def __init__(self, coord, destination=None):
         self.location = coord
+        self.destination = destination
 
 
 class Location(object):
@@ -28,26 +31,19 @@ class Location(object):
 
 def update(ants):
     for ant in ants:
-        ant.location.x += random.randint(-5, 5)
-        ant.location.y += random.randint(-5, 5)
+        if ant.location.x < ant.destination.x:
+            ant.location.x += 1
+        elif ant.location.x > ant.destination.x:
+            ant.location.x -= 1
+
+        if ant.location.y < ant.destination.y:
+            ant.location.y += 1
+        elif ant.location.y > ant.destination.y:
+            ant.location.y -= 1
 
 
-def draw(canvas, ants):
+def draw(canvas, ants, homes, gathering_spots):
     canvas.delete("all")
-
-    homes = [
-        Location(10, 10, 50, 50, "home"),
-        Location(950, 600, 50, 50, "home"),
-        Location(600, 550, 50, 50, "home"),
-    ]
-
-    gathering_spots = [
-        Location(10, 600, 50, 50, "gathering"),
-        Location(1000, 10, 50, 50, "gathering"),
-        Location(600, 550, 50, 50, "gathering"),
-        Location(300, 350, 50, 50, "gathering"),
-        Location(450, 100, 50, 50, "gathering"),
-    ]
 
     for ant in ants:
         canvas.create_rectangle(
@@ -83,7 +79,7 @@ def draw(canvas, ants):
         )
 
 
-def simulate(root, canvas, ants, last_time, debug):
+def simulate(root, canvas, ants, homes, gathering_spots, last_time, debug):
     current_time = time.perf_counter()
     delta_time = current_time - last_time
     last_time = current_time
@@ -96,8 +92,10 @@ def simulate(root, canvas, ants, last_time, debug):
     if debug:
         print("fps:", fps)
     update(ants)
-    draw(canvas, ants)
-    root.after(30, simulate, root, canvas, ants, last_time, debug)
+    draw(canvas, ants, homes, gathering_spots)
+    root.after(
+        30, simulate, root, canvas, ants, homes, gathering_spots, last_time, debug
+    )
 
 
 if __name__ == "__main__":
@@ -147,13 +145,56 @@ if __name__ == "__main__":
     )
     canvas.pack()
 
+    homes = [
+        Location(10, 10, 50, 50, "home"),
+        Location(950, 600, 50, 50, "home"),
+        Location(600, 550, 50, 50, "home"),
+    ]
+
+    gathering_spots = [
+        Location(10, 600, 50, 50, "gathering"),
+        Location(1000, 10, 50, 50, "gathering"),
+        Location(600, 550, 50, 50, "gathering"),
+        Location(300, 350, 50, 50, "gathering"),
+        Location(450, 100, 50, 50, "gathering"),
+    ]
+
     # Make Ants
     ants = []
     for _ in range(num_ants):
         x_coord = random.randint(0, FULL_SCREEN_SIZE[0])
         y_coord = random.randint(0, FULL_SCREEN_SIZE[1])
-        ants.append(Ant(Coord(x_coord, y_coord)))
+
+        # Decide its job
+        # TODO: Clean this up
+        job_index = random.randint(0, 1)
+        if job_index == 0:
+            location_index = random.randint(0, len(homes) - 1)
+            destination = Coord(
+                random.randint(
+                    homes[location_index].coord1.x + 1,
+                    homes[location_index].coord2.x - 1,
+                ),
+                random.randint(
+                    homes[location_index].coord1.y + 1,
+                    homes[location_index].coord2.y - 1,
+                ),
+            )
+        else:
+            location_index = random.randint(0, len(gathering_spots) - 1)
+            destination = Coord(
+                random.randint(
+                    gathering_spots[location_index].coord1.x + 1,
+                    gathering_spots[location_index].coord2.x - 1,
+                ),
+                random.randint(
+                    gathering_spots[location_index].coord1.y + 1,
+                    gathering_spots[location_index].coord2.y - 1,
+                ),
+            )
+
+        ants.append(Ant(Coord(x_coord, y_coord), destination))
 
     last_time = time.perf_counter()
-    simulate(root, canvas, ants, last_time, debug)
+    simulate(root, canvas, ants, homes, gathering_spots, last_time, debug)
     root.mainloop()
